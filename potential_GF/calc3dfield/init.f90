@@ -93,11 +93,17 @@ if(test_ps.eq.0) then
 do i = nx0, nx
 do j = ny0, ny/2
    Bz_init(i,j) = tanh(yc(j)/dtany) &
+        & * 0.25 &
+        & * (1d0+tanh(xc(i)+xmask)) &
+        & * (1d0-tanh(xc(i)-xmask)) &
         & / cosh(sqrt((xc(i)/decx)**2 &
         & + ((yc(j)+lpilsec)/decy)**2))
 end do
 do j = ny/2, ny
    Bz_init(i,j) = tanh(yc(j)/dtany) &
+        & * 0.25 &
+        & * (1d0+tanh(xc(i)+xmask)) &
+        & * (1d0-tanh(xc(i)-xmask)) &
         & / cosh(sqrt((xc(i)/decx)**2 &
         & + ((yc(j)-lpilsec)/decy)**2))
 end do

@@ -32,10 +32,11 @@ real(8),parameter :: dep = 0.50d0
 real(8),parameter :: lpil = 0.25d0
 real(8),parameter :: qps = 1.0d0
 !----- para for sech field
-real(8),parameter :: decx = 2.0d0
+real(8),parameter :: decx = 6.0d0
 real(8),parameter :: decy = 0.3d0
 real(8),parameter :: lpilsec = 0.3d0
 real(8),parameter :: dtany = 0.05d0
+real(8),parameter :: xmask = 20.0
 !----- para mask field
 real(8),parameter :: pmask = 1.5d0
 real(8),parameter :: dmask = 0.3d0
