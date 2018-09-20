@@ -1,0 +1,82 @@
+ &NLIST00
+ XL =  50.0,
+ YL =  50.0,
+ ZL =  50.0,
+ &END
+ &NLIST01
+ ETA =   1.0e-5,
+ ETA1 =  5.0e-4,
+ CC0 =   2.0e1,
+ &END
+ &NLIST02
+ VISC =  2.0e-3,
+ DIFF_RO =  0.0e-4,
+ AKAPPA  =  0.0e-4,
+ GAMMA   =  1.6666666667e0,
+ &END
+ &NLIST03
+ CFR =   0.5,
+ &END
+ &NLIST04
+ NLOOP_INCMAX = 40000,
+ NLOOP_OUTPUT = 500,
+ &END
+ &NLIST05
+ EPSX =   126.0,
+ EPSY =   126.0,
+ EPSZ =   252.0,
+ &END
+ &NLIST06
+ RESET_VELOCITY =  T,
+ ADD_PERTURBATION =  F,
+ RO_INIT = 1.0,
+ PR_INIT = 0.0,
+ RO_MIN  = 0.1e-15,
+ PR_MIN  = 0.000,
+ MMODE1 =  1,
+ MMODE2 =  1,
+ AMPP =   1.0E-3,
+ &END
+ &NLIST07
+ cfile_sysout       = 'SYSOUT',
+ cfile_run_number   = 'RUN_NUMBER',
+ cfile_coordinate_x = 'COORDINATE_x',
+ cfile_coordinate_y = 'COORDINATE_y',
+ cfile_coordinate_z = 'COORDINATE_z',
+ cfile_eigenmode    = 'EIGENMODE',
+ cfile_output_list  = 'OUTPUT', 
+ cfile_time_list    = 'TIME',
+ cfile_2d_field     = 'B2D_for_initial',
+ cfile_3d_field     = 'B3D',
+ cfile_3d_init      = 'B3D_init'
+ cfile_restart      = 'RESTART',
+ cfile_slice_xz     = 'B2D_xz_slice'
+ &END
+ &NLIST08
+ nproc_x = 8,
+ nproc_y = 8,
+ &END
+ &NLIST_EF
+ eflux_x0 = 0.0,
+ eflux_y0 = 0.0,
+ eflux_z0 =-0.4,
+ eflux_ph = 90.0,
+ eflux_vz = 0.02,
+ eflux_t0 = 150.0,
+ eflux_t1 = 168.0,
+ eflux_b0 = 2.0,
+ eflux_r0 = 0.4,
+ eflux_rm = 0.4,
+ eflux_a0 = 0.4,
+ &END
+ &NLIST_LFFF
+ lfff_b0    = 1.0,
+ lfff_alpha = 1.0,
+ lfff_kly_pi= 3.0,
+ lfff_y0    = 0.5,
+ &END
+ &NLIST_DIVBEQ0
+ ch2 = 0.04
+ cp2 = 0.1
+ &END
+ /

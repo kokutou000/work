@@ -1,0 +1,39 @@
+FC = f90
+!FC = f90
+
+OBJ = constants.o common.o job.o pset.o iset.o rkg.o out.o mhd.o urand1.o
+INC = constants.f90 
+OPT = 
+
+all : main.f90 $(OBJ)
+	$(FC) $(OPT) -o nl3d main.f90 $(OBJ)
+
+constants.o : constants.f90
+	$(FC) -c constants.f90
+
+common.o : constants.o common.f90
+	$(FC) -c common.f90
+
+job.o : constants.o common.f90
+	$(FC) -c job.f90
+
+pset.o : common.o pset.f90
+	$(FC) -c pset.f90
+
+iset.o : common.o iset.f90
+	$(FC) -c iset.f90
+
+rkg.o : common.o rkg.f90
+	$(FC) -c rkg.f90
+
+out.o : common.o out.f90
+	$(FC) -c out.f90
+
+mhd.o : common.o mhd.f90
+	$(FC) -c mhd.f90
+
+urand1.o : urand1.f
+	$(FC) -c urand1.f
+
+clean : 
+	\rm -rf *.o

@@ -1,0 +1,671 @@
+! ===========================================================
+!      3D zero-beta nonlinear MHD Model 
+!      NL3DpwD_f90_00 by Kanya Kusano (kusano@jamstec.go.jp)
+! ===========================================================
+module mhd
+! -----------------------------------------------------------
+!                    MODULE mhd
+! -----------------------------------------------------------
+use common
+use mpiut
+implicit none
+integer :: i,j,k,kp,km,jp,jm,ip,im
+integer :: jpp,jmm,kpp,kmm
+real(DP) :: roi
+
+contains
+! -----------------------------------------------------------
+subroutine mhd__delta
+use common
+
+      do i = 0, NX-1
+         ip=i+1
+         im=i-1
+      do j = 0, NY-1
+         jp=j+1
+         jm=j-1
+      do k = 1, NZ-1
+         kp=k+1
+         km=k-1
+         roi = 1.0d0/ro(k,j,i)
+! ..................................[VX]
+         dvx(k,j,i) = dtstep *                          &
+          (-(vx(k,j,i)*(vx(k ,j ,ip)*d1x(i,+1)          &
+                       +vx(k ,j ,i )*d1x(i, 0)          &
+                       +vx(k ,j ,im)*d1x(i,-1))         &
+            +vy(k,j,i)*(vx(k ,jp,i )*d1y(j,+1)          &
+                       +vx(k ,j ,i )*d1y(j, 0)          &
+                       +vx(k ,jm,i )*d1y(j,-1))         &
+            +vz(k,j,i)*(vx(kp,j ,i )*d1z(k,+1)          &
+                       +vx(k ,j ,i )*d1z(k, 0)          &
+                       +vx(km,j ,i )*d1z(k,-1)))        &
+           +roi*                                        &
+            ((cy(k ,j ,i)*bz(k, j, i)                   &
+             -cz(k ,j ,i)*by(k, j, i))                  &
+            -(pr(k ,j ,ip)*d1x(i,+1)                    &
+             +pr(k ,j ,i )*d1x(i, 0)                    &
+             +pr(k ,j ,im)*d1x(i,-1)))                  &
+           +( vx(k ,j ,ip)*d2x(i, 1)                    &
+             +vx(k ,j ,im)*d2x(i,-1)                    &
+             +vx(k ,jp,i )*d2y(j, 1)                    &
+             +vx(k ,jm,i )*d2y(j,-1)                    &
+             +vx(kp,j ,i )*d2z(k, 1)                    &
+             +vx(km,j, i )*d2z(k,-1)                    &
+             +vx(k ,j ,i )*d2xyz0(k,j,i)                &
+            )*visc)                                     
+! ..................................[VY]
+         dvy(k,j,i) = dtstep *                          &
+          (-(vx(k,j,i)*(vy(k ,j ,ip)*d1x(i,+1)          &
+                       +vy(k ,j ,i )*d1x(i, 0)          &
+                       +vy(k ,j ,im)*d1x(i,-1))         &
+            +vy(k,j,i)*(vy(k ,jp,i )*d1y(j,+1)          &
+                       +vy(k ,j ,i )*d1y(j, 0)          &
+                       +vy(k ,jm,i )*d1y(j,-1))         &
+            +vz(k,j,i)*(vy(kp,j ,i )*d1z(k,+1)          &
+                       +vy(k ,j ,i )*d1z(k, 0)          &
+                       +vy(km,j ,i )*d1z(k,-1)))        &
+           +roi*                                        &
+            ((cz(k ,j ,i)*bx(k, j, i)                   &
+             -cx(k ,j ,i)*bz(k, j, i))                  &
+            -(pr(k ,jp,i )*d1y(j,+1)                    &
+             +pr(k ,j ,i )*d1y(j, 0)                    &
+             +pr(k ,jm,i )*d1y(j,-1)))                  &
+           +( vy(k ,j ,ip)*d2x(i, 1)                    &
+             +vy(k ,j ,im)*d2x(i,-1)                    &
+             +vy(k ,jp,i )*d2y(j, 1)                    &
+             +vy(k ,jm,i )*d2y(j,-1)                    &
+             +vy(kp,j ,i )*d2z(k, 1)                    &
+             +vy(km,j ,i )*d2z(k,-1)                    &
+             +vy(k ,j ,i )*d2xyz0(k,j,i)                &
+            )*visc)
+! ..................................[VZ]
+         dvz(k,j,i) = dtstep *                          &
+          (-(vx(k,j,i)*(vz(k ,j ,ip)*d1x(i,+1)          &
+                       +vz(k ,j ,i )*d1x(i, 0)          &
+                       +vz(k ,j ,im)*d1x(i,-1))         &
+            +vy(k,j,i)*(vz(k ,jp,i )*d1y(j,+1)          &
+                       +vz(k ,j ,i )*d1y(j, 0)          &
+                       +vz(k ,jm,i )*d1y(j,-1))         &
+            +vz(k,j,i)*(vz(kp,j ,i )*d1z(k,+1)          &
+                       +vz(k ,j ,i )*d1z(k, 0)          &
+                       +vz(km,j ,i )*d1z(k,-1)))        &
+           +roi*                                        &
+            ((cx(k ,j ,i )*by(k, j, i)                  &
+             -cy(k ,j ,i )*bx(k, j, i))                 &
+            -(pr(kp,j ,i )*d1z(k,+1)                    &
+             +pr(k ,j ,i )*d1z(k, 0)                    &
+             +pr(km,j ,i )*d1z(k,-1)))                  &
+           +( vz(k ,j ,ip)*d2x(i, 1)                    &
+             +vz(k ,j ,im)*d2x(i,-1)                    &
+             +vz(k ,jp,i )*d2y(j, 1)                    &
+             +vz(k ,jm,i )*d2y(j,-1)                    &
+             +vz(kp,j ,i )*d2z(k, 1)                    &
+             +vz(km,j ,i )*d2z(k,-1)                    &
+             +vz(k ,j ,i )*d2xyz0(k,j,i)                &
+           )*visc)
+! ..................................[BX]
+         dbx(k,j,i) =-dtstep *           &
+           ((ez(k ,jp,i )*d1y(j,+1)      &
+            +ez(k ,j ,i )*d1y(j, 0)      &
+            +ez(k ,jm,i )*d1y(j,-1))     &
+           -(ey(kp,j ,i )*d1z(k,+1)      &
+            +ey(k ,j ,i )*d1z(k, 0)      &
+            +ey(km,j ,i )*d1z(k,-1))     &
+           )
+! ..................................[BY]
+         dby(k,j,i) =-dtstep *           &
+           ((ex(kp,j ,i )*d1z(k,+1)      &
+            +ex(k ,j ,i )*d1z(k, 0)      &
+            +ex(km,j ,i )*d1z(k,-1))     &
+           -(ez(k ,j ,ip)*d1x(i,+1)      &
+            +ez(k ,j ,i )*d1x(i, 0)      &
+            +ez(k ,j ,im)*d1x(i,-1))     &
+           )
+! ..................................[BZ]
+         dbz(k,j,i) =-dtstep *           &
+           ((ey(k ,j ,ip)*d1x(i,+1)      &
+            +ey(k ,j ,i )*d1x(i, 0)      &
+            +ey(k ,j ,im)*d1x(i,-1))     &
+           -(ex(k ,jp,i )*d1y(j,+1)      &
+            +ex(k ,j ,i )*d1y(j, 0)      &
+            +ex(k ,jm,i )*d1y(j,-1))     &
+           )
+! ..................................[RO]
+!!$         dro(k,j,i) =-dtstep *           & 
+!!$          (((rvx(k ,j ,ip)*d1x(i,+1)     & 
+!!$            +rvx(k ,j ,i )*d1x(i, 0)     &
+!!$            +rvx(k ,j ,im)*d1x(i,-1))    &
+!!$           +(rvy(k ,jp,i )*d1y(j,+1)     &
+!!$            +rvy(k ,j ,i )*d1y(j, 0)     &
+!!$            +rvy(k ,jm,i )*d1y(j,-1))    &
+!!$           +(rvz(kp,j ,i )*d1z(k,+1)     &
+!!$            +rvz(k ,j ,i )*d1z(k, 0)     &
+!!$            +rvz(km,j ,i )*d1z(k,-1)))   &
+!!$          +diff_ro*                      &
+!!$            (ro (k ,j ,ip)*d2x(i,+1)     &
+!!$            +ro (k ,j ,im)*d2x(i,+1)     &
+!!$            +ro (k ,jp,i )*d2y(j,+1)     &
+!!$            +ro (k ,jm,i )*d2y(j,+1)     &
+!!$            +ro (kp,j ,i )*d2z(j,+1)     &
+!!$            +ro (km,j ,i )*d2z(j,+1)     &
+!!$            +ro (k ,j ,i )*d2xyz0(k,j,i)))
+! ..................................[PR]
+         dpr(k,j,i) =-dtstep *                     &
+          (-(vx(k,j,i)*(pr(k ,j ,ip)*d1x(i,+1)     &
+                       +pr(k ,j ,i )*d1x(i, 0)     &
+                       +pr(k ,j ,im)*d1x(i,-1))    &
+            +vy(k,j,i)*(pr(k ,jp,i )*d1y(j,+1)     &
+                       +pr(k ,j ,i )*d1y(j, 0)     &
+                       +pr(k ,jm,i )*d1y(j,-1))    &
+            +vz(k,j,i)*(pr(kp,j ,i )*d1z(k,+1)     &
+                       +pr(k ,j ,i )*d1z(k, 0)     &
+                       +pr(km,j ,i )*d1z(k,-1)))   &
+           -gamma*pr(k,j,i)*                       &
+                       (vx(k ,j ,ip)*d1x(i,+1)     & 
+                       +vx(k ,j ,i )*d1x(i, 0)     &
+                       +vx(k ,j ,im)*d1x(i,-1)     &
+                       +vy(k ,jp,i )*d1y(j,+1)     &
+                       +vy(k ,j ,i )*d1y(j, 0)     &
+                       +vy(k ,jm,i )*d1y(j,-1)     &
+                       +vz(kp,j ,i )*d1z(k,+1)     &
+                       +vz(k ,j ,i )*d1z(k, 0)     &
+                       +vz(km,j ,i )*d1z(k,-1))    &
+           -gamma1*    (qx(k ,j ,ip)*d1x(i,+1)     & 
+                       +qx(k ,j ,i )*d1x(i, 0)     &
+                       +qx(k ,j ,im)*d1x(i,-1)     &
+                       +qy(k ,jp,i )*d1y(j,+1)     &
+                       +qy(k ,j ,i )*d1y(j, 0)     &
+                       +qy(k ,jm,i )*d1y(j,-1)     &
+                       +qz(kp,j ,i )*d1z(k,+1)     &
+                       +qz(k ,j ,i )*d1z(k, 0)     &
+                       +qz(km,j ,i )*d1z(k,-1))    &
+           +gamma1*res(k,j,i)*                     &
+                       (cx(k,j,i)**2               &
+                       +cy(k,j,i)**2               &
+                       +cz(k,j,i)**2))
+
+      end do
+      end do
+      end do
+
+!
+! >>>>>>>> TOP & BOTTOM boundary
+!
+      do i = 0, nxm1
+         ip=i+1
+         im=i-1
+      do j = 0, nym1
+         jp=j+1
+         jm=j-1
+!
+         k =0
+         kp =k+1
+         kpp=k+2
+!
+         dvx(k,j,i) = 0.0d0
+         dvy(k,j,i) = 0.0d0
+         dvz(k,j,i) = 0.0d0
+!
+         dbx(k,j,i) =-dtstep *        &
+           ((ez(k ,jp,i )*d1y(j,+1)   &
+            +ez(k ,j ,i )*d1y(j, 0)   &
+            +ez(k ,jm,i )*d1y(j,-1))  &
+           -(ey(kpp,j ,i )*d1z(k,+1)  &
+            +ey(kp,j ,i  )*d1z(k, 0)  &
+            +ey(k ,j ,i  )*d1z(k,-1)) &
+           )
+!
+         dby(k,j,i) =-dtstep *        &
+           ((ex(kpp,j ,i )*d1z(k,+1)  &
+            +ex(kp,j ,i  )*d1z(k, 0)  &
+            +ex(k ,j ,i  )*d1z(k,-1)) &
+           -(ez(k ,j ,ip)*d1x(i,+1)   &
+            +ez(k ,j ,i )*d1x(i, 0)   &
+            +ez(k ,j ,im)*d1x(i,-1))  &
+           )
+!
+         dbz(k,j,i) =-dtstep *        &
+           ((ey(k ,j ,ip)*d1x(i,+1)   &
+            +ey(k ,j ,i )*d1x(i, 0)   &
+            +ey(k ,j ,im)*d1x(i,-1))  &
+           -(ex(k ,jp,i )*d1y(j,+1)   &
+            +ex(k ,j ,i )*d1y(j, 0)   &
+            +ex(k ,jm,i )*d1y(j,-1))  &
+           )
+!
+!!$         dro(k,j,i) =-dtstep *           & 
+!!$          (+(rvz(kpp,j ,i )*d1z(k,+1)    &
+!!$            +rvz(kp ,j ,i )*d1z(k, 0)    &
+!!$            +rvz(k  ,j ,i )*d1z(k,-1))   &
+!!$          +(diff_ro*                     &
+!!$            (ro (k ,j ,ip)*d2x(i,+1)     &
+!!$            +ro (k ,j ,i )*d2x(i,+1)     &
+!!$            +ro (k ,j ,im)*d2x(i,+1)     &
+!!$            +ro (k ,jp,i )*d2y(j,+1)     &
+!!$            +ro (k ,j ,i )*d2y(j,+1)     &
+!!$            +ro (k ,jm,i )*d2y(j,+1)     &
+!!$            +ro (kpp,j ,i )*d2z(j,+1)    &
+!!$            +ro (kp ,j ,i )*d2z(j,+1)    &
+!!$            +ro (k  ,j ,i )*d2z(j,+1))))
+!
+         dpr(k,j,i) =-dtstep *                     &
+          (-gamma*pr(k,j,i)*                       &
+                       (vz(kpp,j ,i )*d1z(k,+1)    &
+                       +vz(kp ,j ,i )*d1z(k, 0)    &
+                       +vz(k  ,j ,i )*d1z(k,-1))   &
+           -gamma1*    (qx(k ,j ,ip)*d1x(i,+1)     & 
+                       +qx(k ,j ,i )*d1x(i, 0)     &
+                       +qx(k ,j ,im)*d1x(i,-1)     &
+                       +qy(k ,jp,i )*d1y(j,+1)     &
+                       +qy(k ,j ,i )*d1y(j, 0)     &
+                       +qy(k ,jm,i )*d1y(j,-1)     &
+                       +qz(kpp,j ,i )*d1z(k,+1)    &
+                       +qz(kp ,j ,i )*d1z(k, 0)    &
+                       +qz(k  ,j ,i )*d1z(k,-1)))  
+!
+         k =nz
+         km =k-1
+         kmm=k-2
+!
+         dvx(k,j,i) = 0.0d0
+         dvy(k,j,i) = 0.0d0
+         dvz(k,j,i) = 0.0d0
+!
+         dbx(k,j,i) =-dtstep *        &
+           ((ez(k ,jp,i )*d1y(j,+1)   &
+            +ez(k ,j ,i )*d1y(j, 0)   &
+            +ez(k ,jm,i )*d1y(j,-1))  &
+           -(ey(k ,j ,i )*d1z(k,+1)   &
+            +ey(km,j ,i )*d1z(k, 0)   &
+            +ey(kmm,j ,i)*d1z(k,-1))  &
+           )
+!
+         dby(k,j,i) =-dtstep *        &
+           ((ex(k ,j ,i )*d1z(k,+1)   &
+            +ex(km,j ,i )*d1z(k, 0)   &
+            +ex(kmm,j,i )*d1z(k,-1))  &
+           -(ez(k ,j ,ip)*d1x(i,+1)   &
+            +ez(k ,j ,i )*d1x(i, 0)   &
+            +ez(k ,j ,im)*d1x(i,-1))  &
+           )
+!
+         dbz(k,j,i) =-dtstep *        &
+           ((ey(k ,j ,ip)*d1x(i,+1)   &
+            +ey(k ,j ,i )*d1x(i, 0)   &
+            +ey(k ,j ,im)*d1x(i,-1))  &
+           -(ex(k ,jp,i )*d1y(j,+1)   &
+            +ex(k ,j ,i )*d1y(j, 0)   &
+            +ex(k ,jm,i )*d1y(j,-1))  &
+           )
+!
+!
+!!$         dro(k,j,i) =-dtstep *           & 
+!!$          (+(rvz(k  ,j ,i )*d1z(k,+1)    &
+!!$            +rvz(km ,j ,i )*d1z(k, 0)    &
+!!$            +rvz(kmm,j ,i )*d1z(k,-1))   &
+!!$          +(diff_ro*                     &
+!!$            (ro (k ,j ,ip)*d2x(i,+1)     &
+!!$            +ro (k ,j ,i )*d2x(i,+1)     &
+!!$            +ro (k ,j ,im)*d2x(i,+1)     &
+!!$            +ro (k ,jp,i )*d2y(j,+1)     &
+!!$            +ro (k ,j ,i )*d2y(j,+1)     &
+!!$            +ro (k ,jm,i )*d2y(j,+1)     &
+!!$            +ro (k  ,j ,i )*d2z(j,+1)    &
+!!$            +ro (km ,j ,i )*d2z(j,+1)    &
+!!$            +ro (kmm,j ,i )*d2z(j,+1))))
+!
+         dpr(k,j,i) =-dtstep *                     &
+          (-gamma*pr(k,j,i)*                       &
+                       (vz(k  ,j ,i )*d1z(k,+1)    &
+                       +vz(km ,j ,i )*d1z(k, 0)    &
+                       +vz(kmm,j ,i )*d1z(k,-1))   &
+           -gamma1*    (qx(k ,j ,ip)*d1x(i,+1)     & 
+                       +qx(k ,j ,i )*d1x(i, 0)     &
+                       +qx(k ,j ,im)*d1x(i,-1)     &
+                       +qy(k ,jp,i )*d1y(j,+1)     &
+                       +qy(k ,j ,i )*d1y(j, 0)     &
+                       +qy(k ,jm,i )*d1y(j,-1)     &
+                       +qz(k  ,j ,i )*d1z(k,+1)    &
+                       +qz(km ,j ,i )*d1z(k, 0)    &
+                       +qz(kmm,j ,i )*d1z(k,-1)))   
+!
+      end do
+      end do
+!
+! ########################################
+! ##### data exchage for Y direction #####
+! ########################################
+
+      if(nproc_y /= 0) then
+       call mpiut__exchange_d_y
+      end if
+
+! ########################################
+
+!
+! ###### y=0 boundry #####
+!
+
+   if(index_y == 0) then
+
+         j = 0
+         jp=j+1
+         jpp=j+2
+
+      do i = 0, nxm1
+         ip=i+1
+         im=i-1
+      do k = 1, nzm1
+         kp=k+1
+         km=k-1
+
+!
+         dvx(k,j,i) = 0.0
+         dvy(k,j,i) = 0.0
+         dvz(k,j,i) = 0.0
+!
+         dbx(k,j,i) =-dtstep *        &
+           ((ez(k ,jpp,i)*d1y_0(+1)   &
+            +ez(k ,jp ,i)*d1y_0( 0)   &
+            +ez(k ,j  ,i)*d1y_0(-1))  &
+           -(ey(kp,j ,i )*d1z(k,+1)   &
+            +ey(k ,j ,i )*d1z(k, 0)   &
+            +ey(km,j ,i )*d1z(k,-1))  &
+           )
+!
+         dby(k,j,i) = 0.0
+!
+         dbz(k,j,i) =-dtstep *        &
+           ((ey(k,j ,ip)*d1x(i,+1)    &
+            +ey(k,j ,i )*d1x(i, 0)    &
+            +ey(k,j ,im)*d1x(i,-1))   &
+           -(ex(k,jpp,i)*d1y_0(+1)    &
+            +ex(k,jp ,i)*d1y_0( 0)    &
+            +ex(k,j  ,i)*d1y_0(-1))   &
+           )
+
+         dro(k,j,i) = 0.0
+         dpr(k,j,i) = 0.0
+
+      end do
+      end do
+
+   end if
+!
+! ###### y=Ly boundry #####
+!
+   if(index_y == nproc_y-1) then
+
+         j  = ny
+         jm =j-1
+         jmm=j-2
+!
+      do i = 0, nxm1
+         ip=i+1
+         im=i-1
+      do k = 1, nzm1
+         kp=k+1
+         km=k-1
+
+         dvx(k,j,i) = 0.0
+         dvy(k,j,i) = 0.0
+         dvz(k,j,i) = 0.0
+!
+         dbx(k,j,i) =-dtstep *        &
+           ((ez(k,j  ,i )*d1y_ny(+1)   &
+            +ez(k,jm ,i )*d1y_ny( 0)   &
+            +ez(k,jmm,i )*d1y_ny(-1))  &
+           -(ey(kp,j ,i )*d1z(k,+1)   &
+            +ey(k ,j ,i )*d1z(k, 0)   &
+            +ey(km,j ,i )*d1z(k,-1))  &
+           )        
+!
+         dby(k,j,i) = 0.0
+!
+         dbz(k,j,i) =-dtstep *        &
+           ((ey(k ,j ,ip)*d1x(i,+1)   &
+            +ey(k ,j ,i )*d1x(i, 0)   &
+            +ey(k ,j ,im)*d1x(i,-1))  &
+           -(ex(k ,j ,i )*d1y_ny(+1)   &
+            +ex(k ,jm,i )*d1y_ny( 0)   &
+            +ex(k ,jmm,i)*d1y_ny(-1))  &
+           )
+
+         dro(k,j,i) = 0.0
+         dpr(k,j,i) = 0.0
+
+       end do
+       end do
+
+   end if
+!
+!######### boundary condition for x #########
+
+      if(nproc_x == 1) then
+         call mhd__period(dvx)
+         call mhd__period(dvy)
+         call mhd__period(dvz)
+         call mhd__period(dbx)
+         call mhd__period(dby)
+         call mhd__period(dbz)
+         call mhd__period(dro)
+         call mhd__period(dpr)
+       else
+         call mpiut__exchange_d_x
+      end if
+!
+     return
+end subroutine mhd__delta
+! -----------------------------------------------------------
+subroutine mhd__sub
+use common
+!
+! ++++ momentum (ro*v) ++++
+
+      rvx(:,:,:) = ro(:,:,:)*vx(:,:,:)
+      rvy(:,:,:) = ro(:,:,:)*vy(:,:,:)
+      rvz(:,:,:) = ro(:,:,:)*vz(:,:,:)
+
+! ++++ temperature ++++
+
+      tmp(:,:,:) = pr(:,:,:)/ro(:,:,:)
+!
+! ++++ heat flux ++++
+
+      do i = 0, nxm1
+         ip = i+1
+         im = i-1
+      do j = 0, nym1
+         jp = j+1
+         jm = j-1
+      do k = 1, nzm1
+         kp = k+1
+         km = k-1
+!
+         qx(k,j,i) =-akappa* &
+                     (tmp(k ,j ,ip)*d1x(i,+1) &
+                     +tmp(k, j ,i )*d1x(i, 0) &
+                     +tmp(k ,j ,im)*d1x(i,-1))
+
+         qy(k,j,i) =-akappa* &
+                     (tmp(k ,jp,i )*d1y(j,+1) &
+                     +tmp(k ,j ,i )*d1y(j, 0) &
+                     +tmp(k ,jm,i )*d1y(j,-1))
+
+         qz(k,j,i) =-akappa* &
+                     (tmp(kp,j ,i )*d1z(k,+1) &
+                     +tmp(k ,j ,i )*d1z(k, 0) &
+                     +tmp(km,j ,i )*d1z(k,-1))
+!
+      end do
+      end do
+      end do
+!
+! ++++ current ++++
+!
+      do i = 0, nxm1
+         ip = i+1
+         im = i-1
+      do j = 0, nym1
+         jp = j+1
+         jm = j-1
+      do k = 1, nzm1
+         kp = k+1
+         km = k-1
+!
+         cx(k,j,i) = (bz(k ,jp,i )*d1y(j,+1)  &
+                     +bz(k, j ,i )*d1y(j, 0)  &
+                     +bz(k ,jm,i )*d1y(j,-1)) &
+                    -(by(kp,j ,i )*d1z(k,+1)  &
+                     +by(k ,j ,i )*d1z(k, 0)  &
+                     +by(km,j ,i )*d1z(k,-1))  
+
+         cy(k,j,i) = (bx(kp,j ,i )*d1z(k,+1)  &
+                     +bx(k ,j ,i )*d1z(k, 0)  &
+                     +bx(km,j ,i )*d1z(k,-1)) &
+                    -(bz(k ,j ,ip)*d1x(i,+1)  &
+                     +bz(k ,j ,i )*d1x(i, 0)  &
+                     +bz(k ,j ,im)*d1x(i,-1))  
+
+         cz(k,j,i) = (by(k ,j ,ip)*d1x(i,+1)  &
+                     +by(k ,j ,i )*d1x(i, 0)  &
+                     +by(k ,j ,im)*d1x(i,-1)) &
+                    -(bx(k ,jp,i )*d1y(j,+1)  &
+                     +bx(k ,j ,i )*d1y(j, 0)  &
+                     +bx(k ,jm,i )*d1y(j,-1))  
+!
+      end do
+      end do
+      end do
+!
+! +++ electric current at the top & bottom boundary +++
+
+      do i = 0, nxm1
+         ip = i+1
+         im = i-1
+      do j = 0, nym1
+         jp = j+1
+         jm = j-1
+!
+         k  = 0
+         kp = k+1
+         kpp= k+2
+!
+         cx(k,j,i) = (bz(k ,jp,i )*d1y(j,+1)  &
+                     +bz(k , j,i )*d1y(j, 0)  &
+                     +bz(k ,jm,i )*d1y(j,-1)) &
+                    -(by(kpp,j,i )*d1z(k,+1)  &
+                     +by(kp, j,i )*d1z(k, 0)  &
+                     +by(k , j,i )*d1z(k,-1))  
+
+         cy(k,j,i) = (bx(kpp,j,i )*d1z(k,+1)  &
+                     +bx(kp,j ,i )*d1z(k, 0)  &
+                     +bx(k ,j ,i )*d1z(k,-1)) &
+                    -(bz(k ,j ,ip)*d1x(i,+1)  &
+                     +bz(k ,j ,i )*d1x(i, 0)  &
+                     +bz(k ,j ,im)*d1x(i,-1))   
+
+         cz(k,j,i) = (by(k ,j ,ip)*d1x(i,+1)  &
+                     +by(k ,j ,i )*d1x(i, 0)  &
+                     +by(k ,j ,im)*d1x(i,-1)) &
+                    -(bx(k ,jp,i )*d1y(j,+1)  &
+                     +bx(k ,j ,i )*d1y(j, 0)  &
+                     +bx(k ,jm,i )*d1y(j,-1))   
+!
+         k = nz
+         km = k-1
+         kmm= k-2
+!
+         cx(k,j,i) = (bz(k ,jp,i )*d1y(j,+1)  &
+                     +bz(k, j, i )*d1y(j, 0)  &
+                     +bz(k ,jm,i )*d1y(j,-1)) &
+                    -(by(k ,j ,i )*d1z(k,+1)  &
+                     +by(km,j ,i )*d1z(k, 0)  &
+                     +by(kmm,j,i )*d1z(k,-1))  
+
+         cy(k,j,i) = (bx(k ,j ,i )*d1z(k,+1)  &
+                     +bx(km,j ,i )*d1z(k, 0)  &
+                     +bx(kmm,j,i )*d1z(k,-1)) &
+                    -(bz(k ,j ,ip)*d1x(i,+1)  &
+                     +bz(k ,j ,i )*d1x(i, 0)  &
+                     +bz(k ,j ,im)*d1x(i,-1))  
+
+         cz(k,j,i) = (by(k ,j ,ip)*d1x(i,+1)  &
+                     +by(k ,j ,i )*d1x(i, 0)  &
+                     +by(k ,j ,im)*d1x(i,-1)) &
+                    -(bx(k ,jp,i )*d1y(j,+1)  &
+                     +bx(k, j ,i )*d1y(j, 0)  &
+                     +bx(k ,jm,i )*d1y(j,-1))
+!
+      end do
+      end do
+!
+! ########################################
+! ##### data exchage for Y direction #####
+! ########################################
+
+     if(nproc_y /= 1) then
+        call mpiut__exchange_sub_y
+     end if
+
+! ########################################
+! ##### data exchage for X direction #####
+! ########################################
+
+     if(nproc_x == 1) then
+        call mhd__period(cx)
+        call mhd__period(cy)
+        call mhd__period(cz)
+        call mhd__period(qx)
+        call mhd__period(qy)
+        call mhd__period(qz)
+      else
+        call mpiut__exchange_sub_x
+     end if
+
+! -------------------------------------------------------------
+!
+! ++++ electric field ++++
+!
+       ex(:,:,:) = res(:,:,:)*cx(:,:,:) &
+                  -(vy(:,:,:)*bz(:,:,:)-vz(:,:,:)*by(:,:,:))
+       ey(:,:,:) = res(:,:,:)*cy(:,:,:) &
+                  -(vz(:,:,:)*bx(:,:,:)-vx(:,:,:)*bz(:,:,:))
+       ez(:,:,:) = res(:,:,:)*cz(:,:,:) &
+                  -(vx(:,:,:)*by(:,:,:)-vy(:,:,:)*bx(:,:,:))
+!
+     if(index_y == 0) then
+       ex(:,0,:) = 0.0
+       ey(:,0,:) = 0.0
+       ez(:,0,:) = 0.0
+     end if
+
+     if(index_y == nproc_y-1) then
+       ex(:,NY,:) = 0.0
+       ey(:,NY,:) = 0.0
+       ez(:,NY,:) = 0.0
+     end if
+!
+      return
+end subroutine mhd__sub
+! -----------------------------------------------------------
+subroutine mhd__period(a)
+use constants
+real(DP), dimension(0:NZ,-1:NY,-1:NX), intent(INOUT) :: a
+!
+         a(:,:,NX) = a(:,:,0)
+         a(:,:,-1) = a(:,:,NX-1)
+!
+      return
+end subroutine mhd__period
+
+
+
+
+end module mhd
+
+
+
+
+
+

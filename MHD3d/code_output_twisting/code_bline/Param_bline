@@ -1,0 +1,12 @@
+2, 25, 0.9, 1.0, 0.6, 200    !  dimension, line_number, red, gree, blue, radius
+0.0, 0.0, 1.0,    0.0, 0.0, 0.1,    0.0, 0.1, 0.0     ! (x,y,z)_0, (dx,dy,dz)_1, (dx,dy,dz)_2, 
+##
+3, 27, 1.0, 0.5, 0.6, 300    !  dimension, line_number, red, gree, blue, radius
+1.0, 1.0, 1.0,    2.0, 0.0, 1.0,    0.0, 2.0, 1.0    3.0, 2.0, 4.0 ! (x,y,z)_0, (dx,dy,dz)_1, (dx,dy,dz)_2,   (dx,dy,dz)_3
+
+# This is the sample file for 'Param_bline'
+# The starting point is given as following
+  (x,y,z) = (x,y,z)_0 + i*(dx,dy,dz)_1 + j*(dx,dy,dz)_2
+# in the case of dimension=2.
+
+ 

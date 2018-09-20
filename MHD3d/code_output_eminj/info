@@ -1,0 +1,25 @@
+121
+222
+32
+480
+32
+480
+0
+205
+../../../../../../makeshear_modified20180612/data/exec_divbclean/sh1.1_0825relax/
+150
+158
+!----------
+!information of this "info"
+!----------
+!time step of beginning
+!time step of end
+!lower index of x
+!upper index of x
+!lower index of y
+!upper index of y
+!lower index of z
+!upper index of z
+!path of RESTART file
+!start time for injection of emerging flux
+!stop time for injection of emerging flux

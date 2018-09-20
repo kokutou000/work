@@ -1,0 +1,52 @@
+! ===========================================================
+!      3D finite-beta nonlinear MHD Model 
+!      NL3DpwE_f90_02e by Kanya Kusano (kusano@jamstec.go.jp)
+! ===========================================================
+2004.10.04: ver.00_for_f90 test run reproduced sa30a2
+
+MPI: 1d prallelization for x coordinate
+
+2004.10.07:  copy from  NL3DpwD_mpi_00a
+2004.10.07:  3d array index order is changed to (z, y, x)
+2004.10.18:  file number index is increased to four digits
+2004.10.22:  pst.f90: ithe format of the COORDINATE files are changed
+             from '6e15.5' to '*'.
+2004.11.01:  copy from NL3DpwD_mpi_01c
+
+2005.02.10: debug: pset.f90
+   subroutine pset__resistivity: range of the do loops is extended into
+   the whole range for cx, cy, and cz
+   
+2005.02.28: copy from NL3DpwD_mpi_02d (zero beta version)
+   the following files are modified
+	common.f90, iset.f90, main.f90, mhd.f90, mpiut.f90, out.f90,
+        pset.f90, rkg.f90
+
+2005.06.02: pset.f90
+   pset__dt is updated.
+   fast mode is correctly taken into account to calculate the time step.
+2005.06.03: mhd.f90
+   debug index in the coefficients of density diffusion
+2005.06.07: common.f90
+   remove diff_pr from common and namelist
+
+2007.11.22:
+	Artificial converging motion is imposed on k_z=1, which
+   is one-grid above the photosphere.
+
+2008.02.14:
+   the emerging flux is included.
+   Namelist nlist_ef added
+   a new subroutine eflux.f90 
+   mhd.f90, iset.f90, constants.f90, common.f90 modified
+
+   Directory test_eflux is the directory to test eflux.f90
+
+2008.02.17:
+   mhd.f90
+   dpr=0, dro=0 are imposed in the entire region
+   in order to check whether pressure and density are well solved
+   in the emerging process or not.
+
+
+

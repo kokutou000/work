@@ -1,0 +1,58 @@
+ &NLIST00
+ XL =   1.0,
+ YL =   1.0,
+ ZL =  10.0,
+ &END
+ &NLIST01
+ ETA =   1.0e-5,
+ ETA1 =  5.0e-4,
+ CC0 =   3.0e2,
+ &END
+ &NLIST02
+ VISC =  5.0e-4,
+ DIFF_RO =  0.0e-4,
+ AKAPPA  =  0.0e-4,
+ GAMMA   =  1.6666666667e0,
+ &END
+ &NLIST03
+ CFR =   0.5,
+ &END
+ &NLIST04
+ NLOOP_INCMAX = 500,
+ NLOOP_OUTPUT = 500,
+ &END
+ &NLIST05
+ EPSX =   0.0,
+ EPSY =   0.5,
+ EPSZ =   0.8,
+ &END
+ &NLIST06
+ RESET_VELOCITY =  T,
+ ADD_PERTURBATION =  T,
+ RO_INIT = 1.0,
+ PR_INIT = 0.01,
+ RO_MIN  = 0.01,
+ PR_MIN  = 0.001,
+ MMODE1 =   1,
+ MMODE2 =  10,
+ AMPP =   2.0E-3,
+ &END
+ &NLIST07
+ cfile_sysout       = 'SYSOUT',
+ cfile_run_number   = 'RUN_NUMBER',
+ cfile_coordinate_x = 'COORDINATE_x',
+ cfile_coordinate_y = 'COORDINATE_y',
+ cfile_coordinate_z = 'COORDINATE_z',
+ cfile_eigenmode    = 'EIGENMODE',
+ cfile_output_list  = 'OUTPUT', 
+ cfile_time_list    = 'TIME',
+ cfile_2d_field     = 'B2D_for_initial',
+ cfile_3d_field     = 'B3D',
+ cfile_restart      = 'RESTART',
+ cfile_slice_xz     = 'B2D_xz_slice'
+ &END
+ &NLIST08
+ nproc_x = 8,
+ nproc_y = 8,
+ &END
+ /
